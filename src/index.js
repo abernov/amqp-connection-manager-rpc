@@ -90,6 +90,7 @@ export function connect(urls, options) {
         let channelWrapper = connection.createChannel({
             json: true,
             setup: function (channel) {
+                channelWrapper.ttl = ttl !== undefined ? ttl : 0;
                 return new Promise(async function (resolve, reject) {
                     try {
                         let q = await channel.assertQueue('', {
@@ -110,7 +111,7 @@ export function connect(urls, options) {
                             await channelWrapper.sendToQueue(queue_name, msg, {
                                 correlationId: corr,
                                 replyTo: q.queue,
-                                expiration: (ttl !== null ? ttl : channelWrapper.ttl) * 1000
+                                expiration: (ttl !== undefined ? ttl : channelWrapper.ttl) * 1000
                             });
                             return await getResponce(channelWrapper, corr, ttl);
                         };
@@ -142,7 +143,6 @@ export function connect(urls, options) {
                 });
             }
         });
-        channelWrapper.ttl = ttl || 0;
         if (channelWrapper.sendRPC === null) {
             channelWrapper.sendRPC = async () => {
                 throw new Error('ChannelNotReady');

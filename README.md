@@ -60,7 +60,7 @@ var amqp = require('amqp-connection-manager-rpc');
 var connection = amqp.connect(['amqp://localhost'], {json: true});
 
 // Set up a channel for RPC requests.
-var channelWrapper = connection.createRPCServer(QUEUE_NAME, doRpcJob);
+var channelWrapper = connection.createRPCServer('RPC-QUEUE-test', doRpcJob);
 
 //do RPC job
 async function doRpcJob(msg) {

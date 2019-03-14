@@ -10,7 +10,6 @@
 
 Extend [amqp-connection-manager connection management for amqplib](https://github.com/niahmiah/node-amqp-connection-manager) to support [Remote procedure call (RPC)](https://www.rabbitmq.com/tutorials/tutorial-six-java.html).
 
-Connection management for amqplib. Extend amqp-connection-manager to support Remote procedure call (RPC).
 # amqp-connection-manager-rpc
 
 ## Features

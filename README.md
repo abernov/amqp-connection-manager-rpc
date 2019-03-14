@@ -77,7 +77,7 @@ See a complete example in the [examples](./examples) folder.
 
 ## API
 
-    See [amqp-connection-manager API](https://github.com/niahmiah/node-amqp-connection-manager)
+See [amqp-connection-manager API](https://github.com/niahmiah/node-amqp-connection-manager).
 
 ### AmqpConnectionManager#createRPCClient(queue_name[, ttl])
 
@@ -98,6 +98,6 @@ Callback function has one argument - message from RPC client.
 
 Returns ChannelWrapper 
 
-##Fork it!
+## Fork it!
 
 Pull requests, issues, and feedback are welcome.

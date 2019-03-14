@@ -8,17 +8,17 @@
 [![devDependency Status](https://david-dm.org/niahmiah/amqp-connection-manager-rpc/dev-status.svg)](https://david-dm.org/niahmiah/amqp-connection-manager-rpc#info=devDependencies)
 [![peerDependency Status](https://david-dm.org/niahmiah/amqp-connection-manager-rpc/peer-status.svg)](https://david-dm.org/niahmiah/amqp-connection-manager-rpc#info=peerDependencies)
 
+Extend [amqp-connection-manager connection management for amqplib](https://github.com/niahmiah/node-amqp-connection-manager) to support [Remote procedure call (RPC)](https://www.rabbitmq.com/tutorials/tutorial-six-java.html).
 
-Connection management for amqplib.
-
+Connection management for amqplib. Extend amqp-connection-manager to support Remote procedure call (RPC).
 # amqp-connection-manager-rpc
 
 ## Features
 
-* Extend [amqp-connection-manager](https://github.com/niahmiah/node-amqp-connection-manager) to support [Remote procedure call (RPC)](https://www.rabbitmq.com/tutorials/tutorial-six-java.html).
 * Time to live for RPC requests.
 * Exceptions transmitted from RPC server to RPC client.
 * Simple async function API design
+
 ## Installation
 
     npm install --save amqplib amqp-connection-manager amqp-connection-manager-rpc

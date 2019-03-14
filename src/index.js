@@ -18,7 +18,7 @@ async function getResponce(channelWrapper, corr, ttl) {
             resolve,
             reject
         });
-        if (ttl !== null) {
+        if (ttl !== undefined) {
             channelWrapper.cache.ttl(corr, ttl);
         }
     });

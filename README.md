@@ -88,7 +88,7 @@ Create a new RPC client ChannelWrapper.
   
 Returns ChannelWrapper 
 
-### AmqpConnectionManager#createRPCServer(queue_name, callback)
+### AmqpConnectionManager#createRPCServer(queue_name, callback[, options] )
 
 Create a new RPC server ChannelWrapper.
 
@@ -96,7 +96,20 @@ Create a new RPC server ChannelWrapper.
 * `callback` - A callback function, which returns a Promise. This should return RPC server json reply.
 Callback function has one argument - message from RPC client.
 
+Options:
+
+* `options.sendErrorStack` - if true errors stack will be send to client. Default - false.
+
 Returns ChannelWrapper 
+
+### ChannelWrapper#sendRPC(msg [,ttl])
+
+Send RPC request to RPC server. Call it on client only.
+
+* `msg` -  request Object to RPC server.
+* `ttl` - time to live for RPC request (seconds). To infinite set to 0. If not defined used value from createRPCClient().
+
+Returns Object with RPC job reply or Exception
 
 ## Fork it!
 

@@ -1,6 +1,8 @@
 import _amqp from 'amqp-connection-manager';
 import NodeCache from 'node-cache';
 import uuidv1 from 'uuid/v1';
+import serializeError from 'serialize-error';
+import deserializeError from 'deserialize-error';
 
 async function getResponce(channelWrapper, corr, ttl) {
     return new Promise((resolve, reject) => {
@@ -24,19 +26,6 @@ async function getResponce(channelWrapper, corr, ttl) {
     });
 }
 
-
-function errorToJson(err) {
-    let alt = {};
-    Object.getOwnPropertyNames(err).forEach(function (key) {
-        if (key !== 'stack') { alt[key] = err[key]; }
-    });
-    return alt;
-}
-
-function jsonToError(err) {
-    return new Error(err.message ? err.message : 'unknown');
-}
-
 export function connect(urls, options) {
     let connection = _amqp.connect(urls, options);
 
@@ -44,10 +33,13 @@ export function connect(urls, options) {
      * Create a new RPC worker(server).
      *
      * @param {string} queue_name - Name of queue for RPC request 
-     * @param {function} callback - A callback function, which returns a Promise.
-     * @return {Object} Should return RPC worker(server) json reply .
+     * @param {function} callback - A callback function, 
+     * returns a Promise with RPC server reply or Exception.
+     * @param {Object} [options] -
+     * @param {string} [options.sendErrorStack] - if true errors stack will be send to client. Default - false.
+     * @return {Object} Return RPC worker(server) json reply.
      */
-    connection.createRPCServer = function (queue_name, callback) {
+    connection.createRPCServer = function (queue_name, callback, options) {
         let channelWrapper = this.createChannel({
             json: true,
             setup: channel =>
@@ -63,7 +55,10 @@ export function connect(urls, options) {
                                 let message = JSON.parse(msg.content.toString());
                                 reply.msg = await callback(message);
                             } catch (err) {
-                                reply.err = errorToJson(err);
+                                if (!options || !options.sendErrorStack) {
+                                    delete err.stack;
+                                }
+                                reply.err = serializeError(err);
                             }
                             await channelWrapper.sendToQueue(msg.properties.replyTo, reply, {
                                 correlationId: msg.properties.correlationId
@@ -82,15 +77,15 @@ export function connect(urls, options) {
      * Create a new RPC client.
      *
      * @param {string} queue_name - Name of queue for RPC request 
-     * @param {int} ttl - time to live for RPC request (seconds).
+     * @param {int} [ttl] - time to live for RPC request (seconds).
      * To infinite set to 0. If not defined used 0.
      * @returns {Object} - Channel wrapper
      */
-    connection.createRPCClient = function (queue_name, ttl) {
+    connection.createRPCClient = function (queue_name, ttl=0) {
         let channelWrapper = connection.createChannel({
             json: true,
             setup: function (channel) {
-                channelWrapper.ttl = ttl !== undefined ? ttl : 0;
+                channelWrapper.ttl = ttl;
                 return new Promise(async function (resolve, reject) {
                     try {
                         let q = await channel.assertQueue('', {
@@ -101,7 +96,7 @@ export function connect(urls, options) {
                          * Async function. Send request to RPC server.
                          *
                          * @param {Object} msg - message 
-                         * @param {int} ttl - time to live for RPC request (seconds).
+                         * @param {int} [ttl] - time to live for RPC request (seconds).
                          * To infinite set to 0. If not set used value from createRPCClient.
                          * @returns {Object|Exception} - RPC job reply
                          */
@@ -124,7 +119,7 @@ export function connect(urls, options) {
                                     try {
                                         let json = JSON.parse(msg.content.toString());
                                         if (json.err) {
-                                            value.reject(jsonToError(json.err));
+                                            value.reject(deserializeError(json.err));
                                         } else {
                                             value.resolve(json.msg);
                                         }

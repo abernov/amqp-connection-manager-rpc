@@ -1,11 +1,13 @@
 {
   "name": "amqp-connection-manager-rpc",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Extend amqp-connection-manager to support RPC.",
   "main": "lib/index.js",
   "dependencies": {
     "amqp-connection-manager": "^2.3.0",
+    "deserialize-error": "^0.0.3",
     "node-cache": "^4.2.0",
+    "serialize-error": "^3.0.0",
     "uuid": "^3.3.2"
   },
   "peerDependencies": {

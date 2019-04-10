@@ -37,13 +37,59 @@ export function connect(urls, options) {
      * returns a Promise with RPC server reply or Exception.
      * @param {Object} [options] -
      * @param {string} [options.sendErrorStack] - if true errors stack will be send to client. Default - false.
+     * @param {string} [options.setup] - async function(channel). Default:
+     * async function (channel) => {
+     *      channel.prefetch(1);
+     *      await channel.assertQueue(queue_name, { durable: false });
+     *      return queue_name;
+     * };
      * @return {Object} Return RPC worker(server) json reply.
      */
     connection.createRPCServer = function (queue_name, callback, options) {
         let channelWrapper = this.createChannel({
             json: true,
-            setup: channel =>
-                Promise.all([
+            setup: channel => {
+                return new Promise(async function (resolve, reject) {
+                    try {
+                        let queue;
+                        if (!options || typeof options.setup !== "function") {
+                            channel.prefetch(1);
+                            await channel.assertQueue(queue_name, {
+                                durable: false
+                            });
+                            queue = queue_name;
+                        } else {
+                            queue = await options.setup(channel);
+                        }                      
+                        channel.consume(queue, async function (msg) {
+                            try {
+                                let reply = {};
+                                try {
+                                    let message = JSON.parse(msg.content.toString());
+                                    reply.msg = await callback(message, msg);
+                                } catch (err) {
+                                    if (!options || !options.sendErrorStack) {
+                                        delete err.stack;
+                                    }
+                                    reply.err = serializeError(err);
+                                }
+                                let exchangeName = '';
+                                await channelWrapper.publish(exchangeName, msg.properties.replyTo, reply, {
+                                    correlationId: msg.properties.correlationId
+                                });
+                            } catch (err) {
+                                console.error("RPCServer, consume exception: ", err);
+                            }
+                            channel.ack(msg);
+                        });
+                        resolve();
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            }
+/*                Promise.all([
+                    
                     channel.assertQueue(queue_name, {
                         durable: false
                     }),
@@ -60,7 +106,8 @@ export function connect(urls, options) {
                                 }
                                 reply.err = serializeError(err);
                             }
-                            await channelWrapper.sendToQueue(msg.properties.replyTo, reply, {
+                            let exchangeName = '';
+                            await channelWrapper.publish(exchangeName, msg.properties.replyTo, reply, {
                                 correlationId: msg.properties.correlationId
                             });
                         } catch (err) {
@@ -68,8 +115,8 @@ export function connect(urls, options) {
                         }
                         channel.ack(msg);
                     })
-                ])
-            });
+                ]) */
+        });
         return channelWrapper;
     };
 
@@ -81,11 +128,12 @@ export function connect(urls, options) {
      * To infinite set to 0. If not defined used 0.
      * @returns {Object} - Channel wrapper
      */
-    connection.createRPCClient = function (queue_name, ttl=0) {
+    connection.createRPCClient = function (queue_name, ttl = 0) {
         let channelWrapper = connection.createChannel({
             json: true,
             setup: function (channel) {
                 channelWrapper.ttl = ttl;
+                let exchangeName = '';
                 return new Promise(async function (resolve, reject) {
                     try {
                         let q = await channel.assertQueue('', {
@@ -103,7 +151,7 @@ export function connect(urls, options) {
                         channelWrapper.sendRPC = async function (msg, ttl) {
                             let corr = uuidv1();
                             channelWrapper.corr = corr;
-                            await channelWrapper.sendToQueue(queue_name, msg, {
+                            await channelWrapper.publish(exchangeName, queue_name, msg, {
                                 correlationId: corr,
                                 replyTo: q.queue,
                                 expiration: (ttl !== undefined ? ttl : channelWrapper.ttl) * 1000

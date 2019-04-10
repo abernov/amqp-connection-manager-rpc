@@ -63,10 +63,10 @@ var connection = amqp.connect(['amqp://localhost'], {json: true});
 var channelWrapper = connection.createRPCServer('RPC-QUEUE-test', doRpcJob);
 
 //do RPC job
-async function doRpcJob(msg) {
-    if (!msg.b) throw new Error('B is not set'); //Exceptions allowed! Will be send to RPC client.
+async function doRpcJob(msgJson, msg) {
+    if (!msgJson.b) throw new Error('B is not set'); //Exceptions allowed! Will be send to RPC client.
     let reply = {
-        a: msg.a ? msg.a + 1 : null
+        a: msgJson.a ? msgJson.a + 1 : null
     }
     return reply;
 }
@@ -94,11 +94,17 @@ Create a new RPC server ChannelWrapper.
 
 * `queue_name` -  Name of queue for RPC request.
 * `callback` - A callback function, which returns a Promise. This should return RPC server json reply.
-Callback function has one argument - message from RPC client.
+Callback function has two argument: json message from RPC client, full message from RPC client.
 
 Options:
 
 * `options.sendErrorStack` - if true errors stack will be send to client. Default - false.
+* `options.setup` - async function(channel) for setup channel, exchange. Must return RPC queue name. Default:
+   async function (channel) => {
+         channel.prefetch(1);
+         await channel.assertQueue(queue_name, { durable: false });
+         return queue_name;
+   };
 
 Returns ChannelWrapper 
 

@@ -1,4 +1,17 @@
 
+<a name="1.0.0"></a>
+# 1.0.0 (2019-04-12)
+
+### Features
+* For AmqpConnectionManager#createRPCClient(queue_name, ttl, setup)
+  - added optional parameter 'setup'.
+* For ChannelWrapper#sendRPC = async function (msg, ttl, exchangeName, routingKey)
+  - added optional parameter 'exchangeName'
+  - added optional parameter 'routingKey'
+
+### BREAKING CHANGES
+ - timeout exception message changed to "TimeExpired"
+
 <a name="0.2.0"></a>
 # 0.2.0 (2019-04-10)
 

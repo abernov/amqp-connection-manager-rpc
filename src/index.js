@@ -12,7 +12,7 @@ async function getResponce(channelWrapper, corr, ttl) {
                 checkperiod: Math.floor(channelWrapper.ttl / 2)
             });
             cache.on("expired", (key, value) => {
-                value.reject(new Error('Time expired'));
+                value.reject(new Error('TimeExpired'));
             });
             channelWrapper.cache = cache;
         }
@@ -88,34 +88,6 @@ export function connect(urls, options) {
                     }
                 });
             }
-/*                Promise.all([
-                    
-                    channel.assertQueue(queue_name, {
-                        durable: false
-                    }),
-                    channel.prefetch(1),
-                    channel.consume(queue_name, async function (msg) {
-                        try {
-                            let reply = {};
-                            try {
-                                let message = JSON.parse(msg.content.toString());
-                                reply.msg = await callback(message);
-                            } catch (err) {
-                                if (!options || !options.sendErrorStack) {
-                                    delete err.stack;
-                                }
-                                reply.err = serializeError(err);
-                            }
-                            let exchangeName = '';
-                            await channelWrapper.publish(exchangeName, msg.properties.replyTo, reply, {
-                                correlationId: msg.properties.correlationId
-                            });
-                        } catch (err) {
-                            console.error("RPCServer, consume exception: ", err);
-                        }
-                        channel.ack(msg);
-                    })
-                ]) */
         });
         return channelWrapper;
     };
@@ -123,42 +95,49 @@ export function connect(urls, options) {
     /**
      * Create a new RPC client.
      *
-     * @param {string} queue_name - Name of queue for RPC request 
+     * @param {string} queue_name - Name of queue for RPC request. Default ""
      * @param {int} [ttl] - time to live for RPC request (seconds).
      * To infinite set to 0. If not defined used 0.
+     * @param {Function} [setup] - async function(channel). Default:
+     * async function (channel) => {
+     *      return await channel.assertQueue('', { exclusive: true })
+     * };
      * @returns {Object} - Channel wrapper
      */
-    connection.createRPCClient = function (queue_name, ttl = 0) {
+    connection.createRPCClient = function (queue_name = "", ttl = 0, setup) {
         let channelWrapper = connection.createChannel({
             json: true,
             setup: function (channel) {
                 channelWrapper.ttl = ttl;
-                let exchangeName = '';
                 return new Promise(async function (resolve, reject) {
                     try {
-                        let q = await channel.assertQueue('', {
-                            exclusive: true
-                        });
-
+                        let queue;
+                        if (typeof setup !== "function") {
+                            queue = await channel.assertQueue('', { exclusive: true });
+                        } else {
+                            queue = await setup(channel);
+                        }
                         /**
                          * Async function. Send request to RPC server.
                          *
                          * @param {Object} msg - message 
                          * @param {int} [ttl] - time to live for RPC request (seconds).
                          * To infinite set to 0. If not set used value from createRPCClient.
+                         * @param {String} [exchangeName] - exchange name. Default value ""
+                         * @param {String} [routingKey] - routing key. Default value ""
                          * @returns {Object|Exception} - RPC job reply
                          */
-                        channelWrapper.sendRPC = async function (msg, ttl) {
+                        channelWrapper.sendRPC = async function (msg, ttl, exchangeName = "", routingKey = queue_name) {
                             let corr = uuidv1();
                             channelWrapper.corr = corr;
-                            await channelWrapper.publish(exchangeName, queue_name, msg, {
+                            await channelWrapper.publish(exchangeName, routingKey, msg, {
                                 correlationId: corr,
-                                replyTo: q.queue,
+                                replyTo: queue.queue,
                                 expiration: (ttl !== undefined ? ttl : channelWrapper.ttl) * 1000
                             });
                             return await getResponce(channelWrapper, corr, ttl);
                         };
-                        channel.consume(q.queue, function (msg) {
+                        channel.consume(queue.queue, function (msg) {
                             let cache = channelWrapper.cache;
                             if (cache) {
                                 let value = cache.get(msg.properties.correlationId);

@@ -79,12 +79,16 @@ See a complete example in the [examples](./examples) folder.
 
 See [amqp-connection-manager API](https://github.com/niahmiah/node-amqp-connection-manager).
 
-### AmqpConnectionManager#createRPCClient(queue_name[, ttl])
+### AmqpConnectionManager#createRPCClient(queue_name[, ttl [, setup]])
 
 Create a new RPC client ChannelWrapper.
 
 * `queue_name` -  Name of queue for RPC request.
 * `ttl` - time to live for RPC request (seconds). To infinite set to 0. If not defined used 0.
+* `setup` - async function(channel) for setup queue and exchange. Must return RPC queue. Default:
+     async function (channel) => {
+          return await channel.assertQueue('', { exclusive: true })
+     };
   
 Returns ChannelWrapper 
 
@@ -108,12 +112,15 @@ Options:
 
 Returns ChannelWrapper 
 
-### ChannelWrapper#sendRPC(msg [,ttl])
+### ChannelWrapper#sendRPC(msg [,ttl [, exchangeName [, routingKey]]])
 
 Send RPC request to RPC server. Call it on client only.
 
 * `msg` -  request Object to RPC server.
 * `ttl` - time to live for RPC request (seconds). To infinite set to 0. If not defined used value from createRPCClient().
+* `exchangeName` -  name of exchange for RPC request.
+* `routingKey` -  routing key for RPC request. 
+
 
 Returns Object with RPC job reply or Exception
 

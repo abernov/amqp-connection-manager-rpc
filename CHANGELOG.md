@@ -1,4 +1,10 @@
 
+<a name="1.1.0"></a>
+# 1.1.0 (2019-05-22)
+ * For internal function getResponce changed cache checkperiod value
+
+### Features
+
 <a name="1.0.0"></a>
 # 1.0.0 (2019-04-12)
 

@@ -7,9 +7,13 @@ import deserializeError from 'deserialize-error';
 async function getResponce(channelWrapper, corr, ttl) {
     return new Promise((resolve, reject) => {
         if (!channelWrapper.cache) {
+            let checkperiod = Math.floor(channelWrapper.ttl / 5);
+            if (!checkperiod) {
+                checkperiod = 1;
+            }
             let cache = new NodeCache({
                 stdTTL: channelWrapper.ttl,
-                checkperiod: Math.floor(channelWrapper.ttl / 2)
+                checkperiod
             });
             cache.on("expired", (key, value) => {
                 value.reject(new Error('TimeExpired'));

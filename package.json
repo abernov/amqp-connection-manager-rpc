@@ -1,6 +1,6 @@
 {
   "name": "amqp-connection-manager-rpc",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Extend amqp-connection-manager to support RPC.",
   "main": "lib/index.js",
   "dependencies": {

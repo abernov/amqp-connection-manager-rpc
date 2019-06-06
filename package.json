@@ -53,12 +53,12 @@
     "test": "npm run test:lint && npm run test:unittest",
     "test:unittest": "nyc mocha",
     "test:lint": "eslint src test",
-    "precommit:unittest": "BABEL_DISABLE_CACHE=1 nyc mocha --reporter progress",
+    "precommit:unittest": "cross-env BABEL_DISABLE_CACHE=1 cross-env NODE_ENV=test nyc mocha --reporter progress",
     "semantic-release": "semantic-release"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run test:lint && npm run precommit:unittest"
+      "pre-commit": "npm run test:lint"
     }
   },
   "repository": {

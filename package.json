@@ -1,14 +1,13 @@
 {
   "name": "amqp-connection-manager-rpc",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Extend amqp-connection-manager to support RPC.",
   "main": "lib/index.js",
   "dependencies": {
-    "amqp-connection-manager": "^2.3.0",
-    "deserialize-error": "^0.0.3",
-    "node-cache": "^4.2.0",
-    "serialize-error": "^3.0.0",
-    "uuid": "^3.3.2"
+    "amqp-connection-manager": "^3.0.0",
+    "node-cache": "^5.0.0",
+    "serialize-error": "^5.0.0",
+    "uuid": "^3.3.3"
   },
   "peerDependencies": {
     "amqp-connection-manager": "*"
@@ -21,7 +20,7 @@
     "@jwalton/semantic-release-config": "^1.0.0",
     "@semantic-release/changelog": "^3.0.1",
     "@semantic-release/git": "^7.0.1",
-    "amqplib": "^0.5.1",
+    "amqplib": "^0.5.5",
     "babel-plugin-istanbul": "^5.1.1",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
@@ -42,7 +41,7 @@
     "sinon": "^7.2.4"
   },
   "engines": {
-    "node": ">=6.0.0",
+    "node": ">=8.0.0",
     "npm": ">5.0.0"
   },
   "scripts": {

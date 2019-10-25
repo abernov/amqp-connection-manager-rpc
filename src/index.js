@@ -1,8 +1,7 @@
 import _amqp from 'amqp-connection-manager';
 import NodeCache from 'node-cache';
 import uuidv1 from 'uuid/v1';
-import serializeError from 'serialize-error';
-import deserializeError from 'deserialize-error';
+const { serializeError, deserializeError } = require('serialize-error');
 
 async function getResponce(channelWrapper, corr, ttl) {
     return new Promise((resolve, reject) => {

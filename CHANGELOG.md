@@ -1,3 +1,6 @@
+<a name="1.2.1"></a>
+# 1.2.1 (2019-10-25)
+ * Packages dependencies updated
 
 <a name="1.1.0"></a>
 # 1.1.0 (2019-05-22)

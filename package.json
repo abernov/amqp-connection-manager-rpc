@@ -1,6 +1,6 @@
 {
   "name": "amqp-connection-manager-rpc",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Extend amqp-connection-manager to support RPC.",
   "main": "lib/index.js",
   "dependencies": {
@@ -21,7 +21,7 @@
     "@semantic-release/changelog": "^3.0.1",
     "@semantic-release/git": "^7.0.1",
     "amqplib": "^0.5.5",
-    "babel-plugin-istanbul": "^5.1.1",
+    "babel-plugin-istanbul": "^5.2.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-string": "^1.1.2",
